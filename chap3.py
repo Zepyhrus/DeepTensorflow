@@ -102,10 +102,73 @@ def example3_3_3():
       sess.run(y, feed_dict={x: sp_value})
     )
 
+def example3_4_1():
+  x = tf.placeholder(tf.float32)
+  W = tf.Variable(1.0)
+  b = tf.Variable(1.0)
+  y = W * x + b
 
+  with tf.Session() as sess:
+    tf.global_variables_initializer().run()
+    fetch = y.eval(feed_dict={x: 3.0})
 
+    print(fetch)
+
+def example3_5_3():
+  def minimize(
+    self, loss, global_step=None, val_list=None,
+    gate_gradients=GATE_OP, aggregation_method=None,
+    colocate_gradients_with_ops=False, name=None,
+    grad_loss=None
+  ):
+    # 计算梯度，得到组合后的梯度值与模型参数列表——grads_and_vars
+    # 即<梯度，参数>键值对列表
+    grads_and_vars = self.compute_gradients(
+      loss, var_list=val_list, gate_gardients=gate_gradients,
+      aggregation_method=aggregation_method,
+      colocate_gradients_with_ops=colocate_gradients_with_ops,
+      grad_loss=grad_loss
+    )
+    # 从grads_and_vars中取出非零梯度值对应的模型参数列表——vars_with_grad
+    vars_with_grad = [v for g, v in grads_and_vars if g is not None]
+    # 如果没有非零梯度值，则说明模型计算过程中出现了问题
+    if not vars_with_grad:
+      raise ValueError("..." % ([str(v) for _, v in grads_and_vars], loss))
+
+    # 使用非零梯度值更新对应的模型参数
+    return self.apply_gradients(
+      grads_and_vars, global_step=global_step, name=name
+    )
+
+  X = tf.placeholder(...)
+  Y_ = tf.placeholder(...)
+  w = tf.Variable(...)
+  b = tf.Variable(...)
+  Y = tf.matmul(X, w) + b
+
+  # 使用交叉熵作为损失函数
+  loss = tf.reduce_mean(
+    tf.nn.softmax_cross_entropy_with_logits(labels=Y_, logits=Y)
+  )
+
+  # 优化器
+  optimizer = tf.train.GradientDecentOptimizer(learning_rate=0.01)
+  global_step = tf.Variable(0, name='global_step', trainable=False)
+  train_op = optimizer.minimize(loss, global_step=global_step)
+  with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
+    for step in xrange(max_train_steps):
+      sess.run(train_op, feed_dict={...})
+
+    # 训练日志
+    if step % log_steps == 0:
+      final_loss, weight, bias = sess.run(
+        [loss, w, b], feed_dict={...}
+      )
+      print('Step: ..., loss = ..., w = ..., b = ..., step' \
+        % (step, final_loss, weight, bias))
 
 if __name__ == "__main__":
-  example3_3_3()
+  example3_4_1()
 
 
