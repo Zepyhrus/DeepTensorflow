@@ -1,2 +1,6 @@
 # DeepTensorflow
-examples from boox "Deep Dive into TensorFlow"
+examples from book "Deep Dive into TensorFlow"
+
+
+
+
